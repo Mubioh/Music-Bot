@@ -77,7 +77,7 @@ class MusicMessages {
   static noTrackEmbed() {
     return new EmbedBuilder()
       .setTitle("No Songs in Queue")
-      .setDescription("Use `/play` to start listening to music.")
+      .setDescription("Use `/play [song or link]` to start listening to music.")
       .setColor(this.COLOUR_DEFAULT);
   }
 
