@@ -14,6 +14,20 @@ module.exports = async (client, interaction) => {
   const queue = client.player.nodes.get(interaction.guildId);
 
   if (interaction.isButton()) {
+    const userChannel = interaction.member?.voice?.channel;
+    const botChannel = interaction.guild.members.me.voice.channel;
+
+    if (!userChannel || userChannel.id !== botChannel?.id) {
+      return interaction.reply({
+        embeds: [
+          MusicMessages.error(
+            "You must be in the same voice channel as the bot to use this."
+          ),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
     if (!queue || !queue.isPlaying()) {
       return interaction.reply({
         embeds: [MusicMessages.error("There is no active playback right now.")],
