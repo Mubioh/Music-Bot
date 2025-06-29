@@ -1,17 +1,14 @@
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
 const { Player } = require("discord-player");
+const fs = require("fs");
+const path = require("path");
 
 const { discordToken, musicChannelId } = require("./config");
-
 const MusicMessages = require("./utils/MusicMessages");
-
-const playCommand = require("./commands/play");
-const stopCommand = require("./commands/stop");
 
 const {
   registerExtractors,
   loadEvents,
-  registerCommands,
   registerPlayerEvents,
 } = require("./core/init");
 
@@ -22,8 +19,19 @@ const client = new Client({
 client.commands = new Collection();
 client.player = new Player(client);
 
-client.commands.set(playCommand.data.name, playCommand);
-client.commands.set(stopCommand.data.name, stopCommand);
+// Dynamically load command files
+const commandsPath = path.join(__dirname, "commands");
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".js"));
+
+for (const file of commandFiles) {
+  const filePath = path.join(commandsPath, file);
+  const command = require(filePath);
+  if (command?.data && command?.execute) {
+    client.commands.set(command.data.name, command);
+  } else {
+    console.warn(`[WARN] Command at ${filePath} is missing "data" or "execute".`);
+  }
+}
 
 (async () => {
   await registerExtractors(client.player);
@@ -33,7 +41,6 @@ client.commands.set(stopCommand.data.name, stopCommand);
   loadEvents(client);
 
   client.once("ready", async () => {
-    await registerCommands(client);
     console.log(`✅ Logged in as ${client.user.tag}`);
 
     for (const [guildId, guild] of client.guilds.cache) {
