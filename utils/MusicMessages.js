@@ -68,7 +68,7 @@ class MusicMessages {
       .setDescription(`**[${track.author} - ${track.title}](${track.url})**`)
       .addFields(
         { name: "Song Duration", value: track.duration, inline: true },
-        { name: "Requested by", value: user.toString(), inline: true },
+        { name: "Requested by", value: user?.toString() ?? "Unknown", inline: true },
       )
       .setThumbnail(track.thumbnail)
       .setColor(this.COLOUR_DEFAULT);
