@@ -40,7 +40,6 @@ client.once("ready", async () => {
   await registerCommands(client);
   console.log(`✅ Logged in as ${client.user.tag}`);
 
-  // Attempt to update the last message in each guild's #music channel
   for (const [guildId, guild] of client.guilds.cache) {
     const channel = guild.channels.cache.find(
       (c) => c.id === musicChannelId && c.isTextBased?.()
@@ -52,17 +51,20 @@ client.once("ready", async () => {
       const messages = await channel.messages.fetch({ limit: 1 });
       const last = messages.first();
 
+      const embed = MusicMessages.noTrackEmbed();
+      const row = MusicMessages.controlRow({ disabled: true });
+
       if (last?.author?.id === client.user.id) {
-        await last.edit({
-          embeds: [MusicMessages.noTrackEmbed()],
-          components: [MusicMessages.controlRow({ disabled: true })],
-        });
+        await last.edit({ embeds: [embed], components: [row] });
+      } else {
+        await channel.send({ embeds: [embed], components: [row] });
       }
     } catch (err) {
-      console.warn(`Couldn’t update music embed in ${guild.name}:`, err.message);
+      console.warn(`Couldn’t update or send music embed in ${guild.name}:`, err.message);
     }
   }
 });
+
 
   await client.login(discordToken);
 })();
